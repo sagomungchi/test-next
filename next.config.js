@@ -3,10 +3,12 @@ const withImages = require("next-images");
 const withSass = require("@zeit/next-sass");
 const webpack = require("webpack");
 const path = require("path");
+const withCSS = require('@zeit/next-css');
 
-module.exports = withPlugins([[withSass], [withImages]], {
+module.exports = withPlugins([[withSass], [withImages], [withCSS]], {
   webpack(config, options) {
     config.resolve.modules.push(path.resolve("./"));
     return config;
   }
 });
+

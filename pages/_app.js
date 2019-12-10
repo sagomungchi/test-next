@@ -18,12 +18,14 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import App from "next/app";
-import Head from "next/head";
 import Router from "next/router";
 
 import PageChange from "components/PageChange/PageChange.js";
 
 import "assets/scss/nextjs-material-kit.scss?v=1.0.0";
+import '../node_modules/antd/dist/antd.css'; // or 'antd/dist/antd.less'
+
+import AppLayout from '../components/AppLayout';
 
 Router.events.on("routeChangeStart", url => {
   console.log(`Loading: ${url}`);
@@ -43,6 +45,7 @@ Router.events.on("routeChangeError", () => {
 });
 
 export default class MyApp extends App {
+
   componentDidMount() {
     let comment = document.createComment(`
 
@@ -74,13 +77,11 @@ export default class MyApp extends App {
   }
   render() {
     const { Component, pageProps } = this.props;
-
     return (
       <React.Fragment>
-        <Head>
-          <title>NextJS Material Kit by Creative Tim</title>
-        </Head>
-        <Component {...pageProps} />
+        <AppLayout>
+          <Component {...pageProps} />
+        </AppLayout>
       </React.Fragment>
     );
   }

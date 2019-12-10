@@ -74,6 +74,7 @@ const test = () => {
             <div>Teachable Machine Pose Model</div>
             <button type='button' onClick={init}>Start</button>
             <div><canvas id='canvas'></canvas></div>
+            <div id="label-container"></div>
         </div>
     )
 }
