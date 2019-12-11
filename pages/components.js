@@ -31,7 +31,7 @@ const Components = (props) => {
             <h3 className={classes.subtitle} style={{ color: "white" }}>
               A P.T Program Using Teachable Machine and NextJS.
             </h3>
-            <Text underline strong={true} style={{ fontSize: 80, color: "white", cursor: "pointer" }} >Start!</Text>
+            <Link><a href="./start"><Text underline strong={true} style={{ fontSize: 80, color: "white", cursor: "pointer" }} >Start!</Text></a></Link>
           </div>
         </div>
       </Parallax>

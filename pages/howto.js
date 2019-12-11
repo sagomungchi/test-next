@@ -17,7 +17,7 @@ const Howto = () => {
 
   return (
     <div>
-      <div style={{ width: "100%", height: "880px" , paddingTop: 50 }}>
+      <div style={{ width: "100%", bottom:"10%", position:"absolute" , paddingTop: 50 }}>
        <div style={{ margin: "auto" , marginTop:"75px",width:"70%"}}>
         <Player
           playsInline

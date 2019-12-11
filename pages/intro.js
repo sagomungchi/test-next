@@ -12,11 +12,9 @@ const useStyles = makeStyles(styles);
 const Introduce = () => {
   const classes = useStyles();
 
-
-
   return (
     <div>
-      <div style={{ width: "100%", height: "880px" , paddingTop: 50}}>
+      <div style={{ width: "100%", bottom:"10%", position:"absolute" , paddingTop: 50}}>
         <Carousel autoplay >
             <img src="../static/2.jpg" style={{}} height="830" />
             <img src="../static/1.jpg" style={{}} height="830" />

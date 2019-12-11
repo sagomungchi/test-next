@@ -29,14 +29,14 @@ export default function Footer(props) {
     [classes.footerWhiteFont]: whiteFont
   });
   return (
-    <footer className={footerClasses}>
+    <footer className={footerClasses} style={{bottom:0, position:"absolute", left:"33%"}}>
       <div className={classes.container}>
         <div className={classes.left}>
           <List className={classes.list}>
             <ListItem className={classes.inlineBlock}>
             <Link>
               <a
-                href="./Intro"
+                href="./intro"
                 className={classes.block}
                 target="_blank"
               >
@@ -58,11 +58,11 @@ export default function Footer(props) {
             <ListItem className={classes.inlineBlock}>
             <Link>
               <a
-                href="./about"
+                href="./start"
                 className={classes.block}
                 target="_blank"
               >
-                About
+                Start
               </a>
               </Link>
             </ListItem>
