@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Row, Col } from "antd";
 import * as tf from '@tensorflow/tfjs';
 import * as tmPose from '@teachablemachine/pose';
@@ -9,65 +9,26 @@ const useStyles = makeStyles(styles);
 
 const Start = () => {
   const [startB, setStartB] = useState(true);
-  const [count, setCount] = useState(null);
-  const [stand, setStand] = useState("hi");
-  const [squat, setSquat] = useState(null);
-  const [bent, setBent] = useState(null);
-  const [knee, setKnee] = useState(null);
-  const [wrong, setWrong] = useState(null);
-
   const classes = useStyles();
 
-  const countPlus = () =>{
-    setCount(count+1);
-    return(count)
-  }
-
-  const statusSet = () =>{
-    let status = "";
-
-    if (stand >= 0.95) {
-      if (status === "squat") {
-        countPlus();
-        var audio = new Audio('../static/' + String((count % 10) + 1) + '.mp3')
-        audio.play();
-      }
-
-      if (count === -1) {
-        var audio = new Audio('../static/start.mp3')
-        audio.play();
-        countPlus();
-      }
-      status = "stand";
-    } else if (squat >= 0.95) {
-      status = "squat";
-    } else if (bent >= 0.95) {
-      if (status === "squat" || status === "stand") {
-        var audio = new Audio('../static/bent.mp3')
-        audio.play();
-      }
-      status = "bent_wrong";
-    } else if (knee >= 0.95) {
-      if (status === "squat" || status === "stand") {
-        var audio = new Audio('../static/knee.mp3')
-        audio.play();
-      }
-      status = "knee_wrong";
-    } else if (wrong >= 0.95) {
-      if (status == "squat" || status == "stand") {
-        var audio = new Audio('../static/wrong.mp3')
-        audio.play();
-      }
-      status = "wrong";
-    }
-  }
-
   const URL = "https://teachablemachine.withgoogle.com/models/Nbw1m24Y/";
-  let model, webcam, ctx, labelContainer, maxPredictions;
+  let model, webcam, ctx, maxPredictions;
+  let status = "";
+  let count = 0;
+  let startSound = -1;
 
-  const init = async() =>{
+
+  const init = async () => {
     const modelURL = URL + 'model.json';
     const metadataURL = URL + 'metadata.json';
+
+    if (startSound == -1) {
+      var audio = new Audio('../static/squattutorial.mp3')
+      audio.play();
+      var audio = new Audio('../static/7. Troye Sivan - Wild (feat. Alessia Cara) [Hibell Remix].mp3')
+      audio.play();
+      startSound = 0;
+    }
 
     // load the model and metadata
     // Refer to tmPose.loadFromFiles() in the API to support files from a file picker
@@ -85,47 +46,60 @@ const Start = () => {
     const canvas = document.getElementById('canvas');
     canvas.width = 738; canvas.height = 725;
     ctx = canvas.getContext('2d');
-    labelContainer = document.getElementById('label-container');
-    for (let i = 0; i < maxPredictions; i++) { // and class labels
-      labelContainer.appendChild(document.createElement('div'));
-    }
   }
 
-  const  loop = async(timestamp) => {
+  const loop = async (timestamp) => {
     webcam.update(); // update the webcam frame
     await predict();
     window.requestAnimationFrame(loop);
   }
 
-  const predict = async() => {
+  const predict = async () => {
     // Prediction #1: run input through posenet
     // estimatePose can take in an image, video or canvas html element
     const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
     // Prediction 2: run input through teachable machine classification model
     const prediction = await model.predict(posenetOutput);
 
-    console.log(prediction[0])
-    try{
-    if(prediction[0]){
-      setStand("gd")
-      console.log(stand)
-      setSquat(prediction[1].probability.toFixed(2))
-      setBent(prediction[2].probability.toFixed(2))
-      setKnee(prediction[3].probability.toFixed(2))
-      setWrong(prediction[4].probability.toFixed(2))
-    }
-    statusSet();
-  }catch(e){
-    console.log(e)
-  }
+    const counthtml = document.getElementById('count');
+    counthtml.innerHTML = String(count);
 
-    for (let i = 0; i < maxPredictions; i++) {
-      const classPrediction =
-        prediction[i].className + ': ' + prediction[i].probability.toFixed(2);
-       labelContainer.childNodes[i].innerHTML = classPrediction;
+    if (prediction[0].probability.toFixed(2) > 0.95) {
+      if (status === "squat") {
+        // var audio = new Audio('../static/' + String((count % 10) + 1) + '.mp3')
+        var audio = new Audio('../static/COMEON.mp3')
+        count = count + 1
+        audio.play();
+        counthtml.innerHTML = String(count);
+      }
+
+      status = "stand";
+    } else if (prediction[1].probability.toFixed(2) > 0.95) {
+      status = "squat";
+    } else if (prediction[2].probability.toFixed(2) > 0.95) {
+      if (status === "squat" || status === "stand") {
+        var audio = new Audio('../static/등견고하게.mp3')
+        audio.play();
+      }
+      status = "bent_wrong";
+    } else if (prediction[3].probability.toFixed(2) > 0.95) {
+      if (status === "squat" || status === "stand") {
+        var audio = new Audio('../static/knee.mp3')
+        //audio.play();
+      }
+      //status = "knee_wrong";
+    } else if (prediction[4].probability.toFixed(2) > 0.95) {
+      if (status == "squat" || status == "stand") {
+        var audio = new Audio('../static/wrong.mp3')
+        audio.play();
+      }
+      status = "wrong";
+
     }
+
     // finally draw the poses
     drawPose(pose);
+
   }
 
   const drawPose = (pose) => {
@@ -134,11 +108,11 @@ const Start = () => {
     if (pose) {
       const minPartConfidence = 0.5;
       if (status === "wrong" || status === "knee_wrong" || status === "bent_wrong") {
-        tmPose.drawSkeleton(pose.keypoints, minPartConfidence, ctx, 6, 'red');
-        tmPose.drawKeypoints(pose.keypoints, minPartConfidence, ctx, 6, 'red');
+        tmPose.drawSkeleton(pose.keypoints, minPartConfidence, ctx, 5, 'red');
+        tmPose.drawKeypoints(pose.keypoints, minPartConfidence, ctx, 5, 'red');
       } else {
-        tmPose.drawSkeleton(pose.keypoints, minPartConfidence, ctx, 3, 'aqua');
-        tmPose.drawKeypoints(pose.keypoints, minPartConfidence, ctx, 3, 'aqua');
+        tmPose.drawSkeleton(pose.keypoints, minPartConfidence, ctx, 5, 'aqua');
+        tmPose.drawKeypoints(pose.keypoints, minPartConfidence, ctx, 5, 'aqua');
       }
     }
 
@@ -148,7 +122,12 @@ const Start = () => {
     setStartB(false)
     init();
   }
-  
+
+  const comeonSound = () => {
+    var audio = new Audio('../static/squat!.mp3')
+    audio.play();
+  }
+
 
   return (
     <div>
@@ -159,7 +138,7 @@ const Start = () => {
               <Col sm={3}>
               </Col>
               <Col sm={9}  >
-                <img src="../static/squat.png" style={{ cursor: "pointer" }} height="830" onClick={startSquat} />
+                <img src="../static/squat.png" style={{ cursor: "pointer" }} height="830" onClick={startSquat} onMouseOver={comeonSound} />
               </Col>
               <Col sm={12} >
                 <img src="../static/deadlift.png" height="830" />
@@ -177,8 +156,7 @@ const Start = () => {
               <Col sm={10} >
                 <br /> <br /> <br /><br /><br /> <br /> <br /> <br /> <br />
                 <img src="../static/stopwatch.jpg" style={{ borderRadius: 30, outline: "0.5 solid", height: "500px" }} />
-                <h1 className={classes.title} style={{ position: "absolute", bottom: "25%", left: "29%" }}>{count}</h1>
-                <div id="label-container"></div>
+                <h1 id="count" className={classes.title} style={{ position: "absolute", bottom: "25%", left: "29%" }}></h1>
               </Col>
             </>)}
         </Row>
