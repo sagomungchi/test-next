@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Row, Col } from "antd";
 import * as tf from '@tensorflow/tfjs';
 import * as tmPose from '@teachablemachine/pose';
@@ -10,7 +10,7 @@ const useStyles = makeStyles(styles);
 const Start = () => {
   const [startB, setStartB] = useState(true);
   const [count, setCount] = useState(null);
-  const [stand, setStand] = useState(null);
+  const [stand, setStand] = useState("hi");
   const [squat, setSquat] = useState(null);
   const [bent, setBent] = useState(null);
   const [knee, setKnee] = useState(null);
@@ -65,7 +65,7 @@ const Start = () => {
   const URL = "https://teachablemachine.withgoogle.com/models/Nbw1m24Y/";
   let model, webcam, ctx, labelContainer, maxPredictions;
 
-  async function init() {
+  const init = async() =>{
     const modelURL = URL + 'model.json';
     const metadataURL = URL + 'metadata.json';
 
@@ -91,28 +91,33 @@ const Start = () => {
     }
   }
 
-  async function loop(timestamp) {
+  const  loop = async(timestamp) => {
     webcam.update(); // update the webcam frame
     await predict();
     window.requestAnimationFrame(loop);
   }
 
-  async function predict() {
+  const predict = async() => {
     // Prediction #1: run input through posenet
     // estimatePose can take in an image, video or canvas html element
     const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
     // Prediction 2: run input through teachable machine classification model
     const prediction = await model.predict(posenetOutput);
 
-    if(prediction){
-    setStand(prediction[0].probability.toFixed(2))
-    console.log(stand)
-    setSquat(prediction[1].probability.toFixed(2))
-    setBent(prediction[2].probability.toFixed(2))
-    setKnee(prediction[3].probability.toFixed(2))
-    setWrong(prediction[4].probability.toFixed(2))
+    console.log(prediction[0])
+    try{
+    if(prediction[0]){
+      setStand("gd")
+      console.log(stand)
+      setSquat(prediction[1].probability.toFixed(2))
+      setBent(prediction[2].probability.toFixed(2))
+      setKnee(prediction[3].probability.toFixed(2))
+      setWrong(prediction[4].probability.toFixed(2))
     }
     statusSet();
+  }catch(e){
+    console.log(e)
+  }
 
     for (let i = 0; i < maxPredictions; i++) {
       const classPrediction =
@@ -123,7 +128,7 @@ const Start = () => {
     drawPose(pose);
   }
 
-  function drawPose(pose) {
+  const drawPose = (pose) => {
     ctx.drawImage(webcam.canvas, 0, 0);
     // draw the keypoints and skeleton
     if (pose) {
